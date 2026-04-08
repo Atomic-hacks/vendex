@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Project Notes
+
+Backend review and beginner-friendly next steps live in `BACKEND_REVIEW.md`.
+
 ## Getting Started
 
 First, run the development server:

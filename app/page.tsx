@@ -1,65 +1,111 @@
-import Image from "next/image";
+import Link from "next/link";
+import { auth } from "@/lib/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+  const role = session?.user?.role;
+
+  const nextStep =
+    !session?.user
+      ? { href: "/signup", label: "Create your account" }
+      : role === "UNSET"
+        ? { href: "/onboarding", label: "Finish onboarding" }
+        : role === "VENDOR"
+          ? { href: "/vendor/dashboard", label: "Open vendor dashboard" }
+          : { href: "/marketplace", label: "Browse marketplace" };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-10">
+      <section className="grid gap-6 rounded-[2rem] border border-black/5 bg-white/75 p-8 shadow-[0_20px_80px_-40px_rgba(15,23,42,0.35)] lg:grid-cols-[1.3fr_0.7fr]">
+        <div className="space-y-5">
+          <span className="inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-orange-700">
+            Backend First
+          </span>
+          <h1 className="max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+            Build the marketplace flow first, then polish the experience.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+            Vendex is shaping into a multi-vendor commerce app with buyer auth,
+            vendor onboarding, product variants, stock handling, and order
+            flow. This home page is now your launchpad for exploring each piece.
           </p>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={nextStep.href}
+              className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              {nextStep.label}
+            </Link>
+            <Link
+              href="/marketplace"
+              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+            >
+              View marketplace
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="rounded-[1.5rem] bg-slate-950 p-5 text-slate-100">
+          <p className="text-sm font-semibold text-orange-300">Session snapshot</p>
+          <pre className="mt-4 overflow-x-auto rounded-2xl bg-white/5 p-4 text-xs leading-6 text-slate-200">
+            {JSON.stringify(session?.user ?? null, null, 2)}
+          </pre>
         </div>
-      </main>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {[
+          {
+            title: "Auth flow",
+            text: "Sign up, log in, and route users into onboarding or their working area.",
+            href: "/login",
+            cta: "Open login",
+          },
+          {
+            title: "Buyer view",
+            text: "Browse published products and see the public marketplace experience.",
+            href: "/marketplace",
+            cta: "Open marketplace",
+          },
+          {
+            title: "Vendor tools",
+            text: "Create products, add variants, manage stock, and publish listings.",
+            href: "/vendor/products",
+            cta: "Open vendor products",
+          },
+          {
+            title: "Onboarding",
+            text: "Choose buyer or vendor role and create the first store identity.",
+            href: "/onboarding",
+            cta: "Open onboarding",
+          },
+        ].map((item) => (
+          <Link
+            key={item.title}
+            href={item.href}
+            className="group rounded-[1.5rem] border border-black/5 bg-white/75 p-5 transition hover:-translate-y-1 hover:shadow-[0_18px_40px_-28px_rgba(15,23,42,0.45)]"
+          >
+            <p className="text-lg font-bold text-slate-950">{item.title}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+            <p className="mt-5 text-sm font-semibold text-orange-700 group-hover:text-orange-800">
+              {item.cta}
+            </p>
+          </Link>
+        ))}
+      </section>
+
+      <section className="grid gap-4 rounded-[2rem] border border-black/5 bg-white/70 p-6 lg:grid-cols-3">
+        {[
+          "Auth and onboarding now map roles into the right areas.",
+          "Products follow a variant-based structure, which is what real commerce apps usually need.",
+          "Validation is moving into shared schemas so routes stay easier to reason about.",
+        ].map((point) => (
+          <div key={point} className="rounded-[1.25rem] bg-slate-50 p-5">
+            <p className="text-sm leading-6 text-slate-700">{point}</p>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }
